@@ -1,0 +1,22 @@
+{
+    "sourceFile": "lecture_alert/accounts/templates/accounts/edit_timet",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 1,
+            "patches": [
+                {
+                    "date": 1736684036542,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                },
+                {
+                    "date": 1736684053366,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -1,5 +1,4 @@\n-able.html\r\n {% load static %}\r\n <!DOCTYPE html>\r\n <html lang=\"en\">\r\n <head>\r\n"
+                }
+            ],
+            "date": 1736684036542,
+            "name": "Commit-0",
+            "content": "able.html\r\n{% load static %}\r\n<!DOCTYPE html>\r\n<html lang=\"en\">\r\n<head>\r\n    <meta charset=\"UTF-8\">\r\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\r\n    <title>Edit Timetable</title>\r\n    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>\r\n    <link rel=\"stylesheet\" href=\"{% static 'css/edit_timetable.css' %}\">\r\n</head>\r\n<body>\r\n    <div class=\"container\">\r\n        <h2>Edit Timetable Entry</h2>\r\n        {% if messages %}\r\n        <div class=\"messages\">\r\n            {% for message in messages %}\r\n            <div class=\"alert alert-{{ message.tags }}\">{{ message }}</div>\r\n            {% endfor %}\r\n        </div>\r\n        {% endif %}\r\n        \r\n        <form method=\"POST\" action=\"{% url 'edit_timetable' timetable.id %}\">\r\n            {% csrf_token %}\r\n            <div class=\"style1\">\r\n                <!-- ...existing department and course selects... -->\r\n                <div class=\"style department\">\r\n                    <label for=\"departmentSelect1\">Department</label>\r\n                    <select name=\"department\" id=\"departmentSelect1\" required>\r\n                        <option value=\"\" disabled>Department</option>\r\n                        {% for id, name in departments.items %}\r\n                            <option value=\"{{ name }}\" {% if name == timetable.department %}selected{% endif %}>\r\n                                {{ name }}\r\n                            </option>\r\n                        {% endfor %}\r\n                    </select>\r\n                </div>\r\n                <!-- ...existing form fields... -->\r\n            </div>\r\n            <div class=\"button-group\">\r\n                <button type=\"submit\" class=\"btn btn-primary\">Save Changes</button>\r\n                <a href=\"{% url 'view_timetable' timetable.lecturer.id %}\" class=\"btn btn-secondary\">Cancel</a>\r\n            </div>\r\n        </form>\r\n    </div>\r\n    <script src=\"{% static 'javascript/edit_timetable.js' %}\"></script>\r\n</body>\r\n</html>"
+        }
+    ]
+}

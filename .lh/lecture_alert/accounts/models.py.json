@@ -1,0 +1,30 @@
+{
+    "sourceFile": "lecture_alert/accounts/models.py",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 3,
+            "patches": [
+                {
+                    "date": 1736629289942,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                },
+                {
+                    "date": 1736629358879,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -31,9 +31,8 @@\n \r\n \r\n \r\n class Timetable(models.Model):\r\n-    lecturer = models.ForeignKey(Lecturer, on_delete=models.CASCADE, related_name='timetables')\r\n     department = models.CharField(max_length=100)\r\n     course = models.CharField(max_length=100)\r\n     date = models.DateField()\r\n     start_time = models.TimeField()\r\n"
+                },
+                {
+                    "date": 1736631032833,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -31,9 +31,10 @@\n \r\n \r\n \r\n class Timetable(models.Model):\r\n-    \r\n+        lecturer = models.ForeignKey(Lecturer, on_delete=models.CASCADE, related_name='timetables')\r\n+\r\n     department = models.CharField(max_length=100)\r\n     course = models.CharField(max_length=100)\r\n     date = models.DateField()\r\n     start_time = models.TimeField()\r\n"
+                },
+                {
+                    "date": 1736680793690,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -31,9 +31,9 @@\n \r\n \r\n \r\n class Timetable(models.Model):\r\n-    lecturer = models.ForeignKey('Lecturer', on_delete=models.CASCADE, related_name='timetables')\r\n+    lecturer = models.ForeignKey(Lecturer, on_delete=models.CASCADE)\r\n     department = models.CharField(max_length=100)\r\n     course = models.CharField(max_length=100)\r\n     date = models.DateField()\r\n     start_time = models.TimeField()\r\n"
+                }
+            ],
+            "date": 1736629289942,
+            "name": "Commit-0",
+            "content": "from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager\r\nfrom django.db import models\r\n\r\nclass CustomUserManager(BaseUserManager):\r\n    def create_user(self, email, username, fullname, password=None, **extra_fields):\r\n        if not email:\r\n            raise ValueError('Users must have an email address')\r\n        email = self.normalize_email(email)\r\n        user = self.model(email=email, username=username, fullname=fullname, **extra_fields)\r\n        user.set_password(password)\r\n        user.save(using=self._db)\r\n        return user\r\n\r\nclass Admin(AbstractBaseUser):\r\n    id = models.AutoField(primary_key=True)\r\n    fullname = models.CharField(max_length=100)\r\n    username = models.CharField(max_length=30, unique=True)\r\n    email = models.EmailField(unique=True)\r\n    phone = models.CharField(max_length=15)\r\n    password = models.CharField(max_length=128)\r\n    is_active = models.BooleanField(default=True)\r\n    is_staff = models.BooleanField(default=True)\r\n\r\n    objects = CustomUserManager()\r\n\r\n    USERNAME_FIELD = 'email'\r\n    REQUIRED_FIELDS = ['username', 'fullname']\r\n\r\n    class Meta:\r\n        db_table = 'accounts_admin'\r\n\r\n\r\n\r\nclass Timetable(models.Model):\r\n    lecturer = models.ForeignKey(Lecturer, on_delete=models.CASCADE, related_name='timetables')\r\n    department = models.CharField(max_length=100)\r\n    course = models.CharField(max_length=100)\r\n    date = models.DateField()\r\n    start_time = models.TimeField()\r\n    end_time = models.TimeField()\r\n    venue = models.CharField(max_length=100)  # Added 'venue' field\r\n\r\n    def __str__(self):\r\n        return f\"{self.course} on {self.date} at {self.start_time}\"\r\n\r\nclass Lecturer(AbstractBaseUser):\r\n    id = models.AutoField(primary_key=True)\r\n    fullname = models.CharField(max_length=100)\r\n    username = models.CharField(max_length=30, unique=True)\r\n    email = models.EmailField(unique=True)\r\n    phone = models.CharField(max_length=15)\r\n    department = models.CharField(max_length=100)\r\n    courses = models.CharField(max_length=255)\r\n    password = models.CharField(max_length=128)\r\n    is_active = models.BooleanField(default=True)\r\n\r\n    objects = CustomUserManager()\r\n\r\n    USERNAME_FIELD = 'email'\r\n    REQUIRED_FIELDS = ['username', 'fullname']\r\n\r\n    class Meta:\r\n        db_table = 'accounts_lecturer'\r\n"
+        }
+    ]
+}

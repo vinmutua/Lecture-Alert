@@ -1,0 +1,42 @@
+{
+    "sourceFile": "lecture_alert/accounts/templates/accounts/add_timetable.html",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 6,
+            "patches": [
+                {
+                    "date": 1736632774604,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                },
+                {
+                    "date": 1736634628866,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -11,9 +11,9 @@\n </head>\r\n <body>\r\n     <div class=\"container\">\r\n         <h2>Add New Timetable Entry</h2>\r\n-        <form method=\"POST\" action=\"{% url 'add_timetable' %}\">\r\n+        <form method=\"POST\" action=\"{% url 'add_timetable_for_lecturer' lecturer.id %}\">\r\n             {% csrf_token %}\r\n             <div class=\"style1\">\r\n                 <div class=\"style department\">\r\n                     <label for=\"departmentSelect1\">Department</label>\r\n"
+                },
+                {
+                    "date": 1736638480483,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -11,9 +11,9 @@\n </head>\r\n <body>\r\n     <div class=\"container\">\r\n         <h2>Add New Timetable Entry</h2>\r\n-        <form method=\"POST\" action=\"{% url 'add_timetable_for_lecturer' lecturer.id %}\">\r\n+        <form method=\"POST\" action=\"{% url 'add_timetable' %}\">\r\n             {% csrf_token %}\r\n             <div class=\"style1\">\r\n                 <div class=\"style department\">\r\n                     <label for=\"departmentSelect1\">Department</label>\r\n"
+                },
+                {
+                    "date": 1736638682590,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -13,9 +13,8 @@\n     <div class=\"container\">\r\n         <h2>Add New Timetable Entry</h2>\r\n         <form method=\"POST\" action=\"{% url 'add_timetable' %}\">\r\n             {% csrf_token %}\r\n-            <div class=\"style1\">\r\n                 <div class=\"style department\">\r\n                     <label for=\"departmentSelect1\">Department</label>\r\n                     <select name=\"department\" id=\"departmentSelect1\" required>\r\n                         <option value=\"\" disabled selected>Department</option>\r\n"
+                },
+                {
+                    "date": 1736638702088,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -51,8 +51,9 @@\n                 </div>\r\n             </div>\r\n             <button type=\"submit\" class=\"btn btn-primary\">Add Timetable</button>\r\n         </form>\r\n+        \r\n     </div>\r\n     <script src=\"{% static 'js/timetable.js' %}\"></script>\r\n </body>\r\n </html>\n\\ No newline at end of file\n"
+                },
+                {
+                    "date": 1736638708180,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -51,9 +51,9 @@\n                 </div>\r\n             </div>\r\n             <button type=\"submit\" class=\"btn btn-primary\">Add Timetable</button>\r\n         </form>\r\n-        <div class=\"style1\">\r\n+                    <div class=\"style1\">\r\n \r\n     </div>\r\n     <script src=\"{% static 'js/timetable.js' %}\"></script>\r\n </body>\r\n"
+                },
+                {
+                    "date": 1736638769613,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -55,7 +55,7 @@\n             <button type=\"submit\" class=\"btn btn-primary\">Add Timetable</button>\r\n         </form>\r\n     </div>\r\n     </div>\r\n-    <script src=\"{% static 'javas/timetable.js' %}\"></script>\r\n+    <script src=\"{% static 'javascri/timetable.js' %}\"></script>\r\n </body>\r\n </html>\n\\ No newline at end of file\n"
+                }
+            ],
+            "date": 1736632774603,
+            "name": "Commit-0",
+            "content": "{% load static %}\r\n\r\n<!DOCTYPE html>\r\n<html lang=\"en\">\r\n<head>\r\n    <meta charset=\"UTF-8\">\r\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\r\n    <title>Add Timetable</title>\r\n    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>\r\n    <link rel=\"stylesheet\" href=\"{% static 'css/add_timetable.css' %}\">\r\n</head>\r\n<body>\r\n    <div class=\"container\">\r\n        <h2>Add New Timetable Entry</h2>\r\n        <form method=\"POST\" action=\"{% url 'add_timetable' %}\">\r\n            {% csrf_token %}\r\n            <div class=\"style1\">\r\n                <div class=\"style department\">\r\n                    <label for=\"departmentSelect1\">Department</label>\r\n                    <select name=\"department\" id=\"departmentSelect1\" required>\r\n                        <option value=\"\" disabled selected>Department</option>\r\n                        <option value=\"Agriculture and Environmental Sciences\">Agriculture and Environmental Sciences</option>\r\n                        <option value=\"Business, Economics and Tourism\">Business, Economics and Tourism</option>\r\n                        <option value=\"Education & Lifelong Learning\">Education & Lifelong Learning</option>\r\n                        <option value=\"Engineering and Architecture\">Engineering and Architecture</option>\r\n                        <option value=\"Health Sciences\">Health Sciences</option>\r\n                        <option value=\"Law\">Law</option>\r\n                        <option value=\"Pure And Applied Sciences\">Pure And Applied Sciences</option>\r\n                    </select>\r\n                </div>\r\n                <div class=\"style courses\">\r\n                    <label for=\"coursesSelect1\">Courses</label>\r\n                    <select name=\"course\" id=\"coursesSelect1\" required>\r\n                        <option value=\"\" disabled selected>Courses</option>\r\n                    </select>\r\n                </div>\r\n                <div class=\"style date\">\r\n                    <label for=\"date\">Date</label>\r\n                    <input type=\"date\" name=\"date\" id=\"date\" required>\r\n                </div>\r\n                <div class=\"style start_time\">\r\n                    <label for=\"start_time\">Start Time</label>\r\n                    <input type=\"time\" name=\"start_time\" id=\"start_time\" required>\r\n                </div>\r\n                <div class=\"style end_time\">\r\n                    <label for=\"end_time\">End Time</label>\r\n                    <input type=\"time\" name=\"end_time\" id=\"end_time\" required>\r\n                </div>\r\n                <div class=\"style venue\">\r\n                    <label for=\"venue\">Venue</label>\r\n                    <input type=\"text\" name=\"venue\" placeholder=\"Venue\" required>\r\n                </div>\r\n            </div>\r\n            <button type=\"submit\" class=\"btn btn-primary\">Add Timetable</button>\r\n        </form>\r\n    </div>\r\n    <script src=\"{% static 'js/timetable.js' %}\"></script>\r\n</body>\r\n</html>"
+        }
+    ]
+}
