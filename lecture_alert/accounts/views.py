@@ -1,11 +1,10 @@
-# /F:/Lecture_alert/lecture_alert/accounts/views.py
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth import authenticate, login
 from django.views.decorators.csrf import ensure_csrf_cookie
 import json
-from .forms import UserLoginForm, UserRegistrationForm
-from .models import Admin, Lecturer, Timetable  # Remove CustomUser import
+from .forms import UserLoginForm
+from .models import Admin, Lecturer, Timetable  
 from django.contrib.auth.hashers import make_password, check_password
 from django.db import transaction
 from django.http import JsonResponse
@@ -24,17 +23,32 @@ def login_view(request):
             try:
                 if role == 'Admin':
                     user = Admin.objects.get(username=username)
+                    print(f"Admin login attempt: {username}")
                 else:
                     user = Lecturer.objects.get(username=username)
+                    print(f"Lecturer login attempt: {username}")
                     
                 if check_password(password, user.password):
-                    return redirect('admin_dashboard' if role == 'Admin' else 'lecturer_dashboard')
+                    print(f"Password verified for {username}")
+                    
+                    request.session['user_id'] = user.id
+                    request.session['role'] = role
+                    request.session['username'] = username
+                    
+                    if role == 'Admin':
+                        print("Redirecting to admin dashboard")
+                        return redirect('admin_dashboard')
+                    else:
+                        print("Redirecting to lecturer dashboard")
+                        return redirect('lecturer_dashboard')
                 else:
+                    print("Invalid password")
                     form.add_error(None, 'Invalid credentials')
-            except (Admin.DoesNotExist, Lecturer.DoesNotExist):
+            except (Admin.DoesNotExist, Lecturer.DoesNotExist) as e:
+                print(f"User not found: {e}")
                 form.add_error(None, 'Invalid credentials')
         else:
-            print("Form is not valid.")
+            print("Form validation failed")
             print(form.errors)
     else:
         form = UserLoginForm()
@@ -59,6 +73,8 @@ def view_timetable(request, lecturer_id):
         'lecturer': lecturer,
         'timetables': timetables
     })
+
+# ADDING TIMETABLE
 
 def add_timetable(request, lecturer_id):
     lecturer = get_object_or_404(Lecturer, id=lecturer_id)
@@ -171,8 +187,29 @@ def register(request):
             
     return render(request, 'accounts/admin_dashboard.html')
 
+# LECTURER LOGIN LOGIC
 def lecturer_dashboard(request):
-    return render(request, 'accounts/lecturer_dashboard.html')
+    print("Lecturer dashboard view called")
+    user_id = request.session.get('user_id')
+    role = request.session.get('role')
+    
+    if not user_id or role != 'Lecturer':
+        print("Invalid session, redirecting to login")
+        return redirect('login')
+    
+    try:
+        lecturer = Lecturer.objects.get(id=user_id)
+        timetables = Timetable.objects.filter(lecturer=lecturer).order_by('date', 'start_time')
+        print(f"Found {timetables.count()} timetables for {lecturer.username}")
+        
+        return render(request, 'accounts/lecturer_dashboard.html', {
+            'lecturer': lecturer,
+            'timetables': timetables
+        })
+    except Lecturer.DoesNotExist:
+        print("Lecturer not found")
+        return redirect('login')
+
 # RETRIEVING ALL LECTURERS FOR ADMIN LANDING PAGE
 @ensure_csrf_cookie
 def admin_dashboard(request):
@@ -226,3 +263,10 @@ def edit_lecturer(request, lecturer_id):
     }
     
     return render(request, 'accounts/edit_lecturer.html', context)
+#VIEWING ALL ADMINS
+def all_admins(request):
+    if not request.session.get('user_id') or request.session.get('role') != 'Admin':
+        return redirect('login')
+    
+    admins = Admin.objects.all().order_by('fullname')
+    return render(request, 'accounts/all_admins.html', {'admins': admins})

@@ -1,0 +1,22 @@
+{
+    "sourceFile": "lecture_alert/notification/celery.py",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 1,
+            "patches": [
+                {
+                    "date": 1737125527805,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                },
+                {
+                    "date": 1737126549743,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -1,19 +1,21 @@\n from __future__ import absolute_import, unicode_literals\r\n import os\r\n from celery import Celery\r\n+from celery.schedules import crontab\r\n from datetime import timedelta\r\n \r\n os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'lecture_alert.settings')\r\n \r\n app = Celery('lecture_alert')\r\n app.config_from_object('django.conf:settings', namespace='CELERY')\r\n app.autodiscover_tasks()\r\n \r\n+# Schedule task to run every 5 minutes\r\n app.conf.beat_schedule = {\r\n     'check-upcoming-lectures': {\r\n-        'task': 'notification.tasks.check_upcoming_lectures',\r\n-        'schedule': timedelta(minutes=5),\r\n-    },\r\n+        'task': 'notification.tasks.check_and_send_notifications',\r\n+        'schedule': 300.0,  # 5 minutes\r\n+    }\r\n }\r\n \r\n app.conf.timezone = 'UTC'\n\\ No newline at end of file\n"
+                }
+            ],
+            "date": 1737125527805,
+            "name": "Commit-0",
+            "content": "from __future__ import absolute_import, unicode_literals\r\nimport os\r\nfrom celery import Celery\r\nfrom datetime import timedelta\r\n\r\nos.environ.setdefault('DJANGO_SETTINGS_MODULE', 'lecture_alert.settings')\r\n\r\napp = Celery('lecture_alert')\r\napp.config_from_object('django.conf:settings', namespace='CELERY')\r\napp.autodiscover_tasks()\r\n\r\napp.conf.beat_schedule = {\r\n    'check-upcoming-lectures': {\r\n        'task': 'notification.tasks.check_upcoming_lectures',\r\n        'schedule': timedelta(minutes=5),\r\n    },\r\n}\r\n\r\napp.conf.timezone = 'UTC'"
+        }
+    ]
+}

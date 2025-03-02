@@ -3,7 +3,7 @@
     "activeCommit": 0,
     "commits": [
         {
-            "activePatchIndex": 6,
+            "activePatchIndex": 7,
             "patches": [
                 {
                     "date": 1736633864618,
@@ -32,6 +32,10 @@
                 {
                     "date": 1736720553033,
                     "content": "Index: \n===================================================================\n--- \n+++ \n@@ -144,9 +144,9 @@\n                         <td>{{ lecturer.department }}</td>\r\n                         <td>\r\n                             <a href=\"{% url 'view_timetable' lecturer.id %}\" class=\"btn green\">View Timetable</a>                        </td>\r\n                         <td>\r\n-                            <button class=\"btn btn-primary\">Edit</button>\r\n+                            <a href=\"{% url 'edit_lecturer' lecturer.id %}\" class=\"btn btn-primary\">Edit</a>\r\n                             <button class=\"btn btn-danger delete-lecturer\" data-lecturer-id=\"{{ lecturer.id }}\">Delete</button>\r\n                         </td>\r\n                     </tr>\r\n                     {% empty %}\r\n"
+                },
+                {
+                    "date": 1737120003098,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -25,10 +25,9 @@\n             </div>\r\n             <div class=\"nav_menu\">\r\n                 <ul>\r\n                     <li><a href=\"{% url 'all_lecturers' %}\">Lecturers</a></li>\r\n-                    <li><a href=\"#\">Admins</a></li>\r\n-\r\n+                    <li><a href=\"{% url 'all_admins' %}\">Admins</a></li>\r\n                 </ul>\r\n             </div>\r\n             <div class=\"logout\">\r\n                 <a href=\"{% url 'login' %}\">Logout</a>\r\n"
                 }
             ],
             "date": 1736633864618,

@@ -34,6 +34,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
      'livereload',
     'accounts',
+    'notification',
+    'django_celery_beat',
+
 ]
 
 MIDDLEWARE = [

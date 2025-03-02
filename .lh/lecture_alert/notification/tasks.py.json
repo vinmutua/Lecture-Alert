@@ -1,0 +1,22 @@
+{
+    "sourceFile": "lecture_alert/notification/tasks.py",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 1,
+            "patches": [
+                {
+                    "date": 1737125513844,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                },
+                {
+                    "date": 1737126516667,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -1,41 +1,49 @@\n from celery import shared_task\r\n-from datetime import datetime, timedelta\r\n from django.utils import timezone\r\n+from datetime import timedelta\r\n from accounts.models import Timetable\r\n from .models import Notification\r\n from .infobip_service import InfobipService\r\n \r\n @shared_task\r\n-def check_upcoming_lectures():\r\n+def check_and_send_notifications():\r\n+    # Get current time and 30min threshold\r\n     now = timezone.now()\r\n-    threshold = now + timedelta(minutes=30)\r\n-    \r\n+    thirty_mins_later = now + timedelta(minutes=30)\r\n+\r\n+    # Find upcoming lectures\r\n     upcoming_lectures = Timetable.objects.filter(\r\n         date=now.date(),\r\n         start_time__gte=now.time(),\r\n-        start_time__lte=(now + timedelta(minutes=30)).time()\r\n+        start_time__lte=thirty_mins_later.time()\r\n     ).select_related('lecturer')\r\n \r\n-    infobip = InfobipService()\r\n+    # Initialize InfoBip service\r\n+    sms_service = InfobipService()\r\n \r\n     for lecture in upcoming_lectures:\r\n         # Check if notification already sent\r\n-        if not Notification.objects.filter(\r\n+        notification_exists = Notification.objects.filter(\r\n             lecturer=lecture.lecturer,\r\n             sent_at__date=now.date(),\r\n             is_sent=True\r\n-        ).exists():\r\n+        ).exists()\r\n+\r\n+        if not notification_exists:\r\n+            # Prepare message\r\n             message = (\r\n                 f\"Reminder: You have a {lecture.course} lecture \"\r\n-                f\"at {lecture.start_time} in {lecture.venue}\"\r\n+                f\"scheduled for {lecture.start_time} \"\r\n+                f\"at {lecture.venue}\"\r\n             )\r\n-            \r\n-            success, response = infobip.send_sms(\r\n+\r\n+            # Send SMS\r\n+            success, response = sms_service.send_sms(\r\n                 lecture.lecturer.phone,\r\n                 message\r\n             )\r\n-            \r\n+\r\n             # Record notification\r\n             Notification.objects.create(\r\n                 lecturer=lecture.lecturer,\r\n                 message=message,\r\n"
+                }
+            ],
+            "date": 1737125513844,
+            "name": "Commit-0",
+            "content": "from celery import shared_task\r\nfrom datetime import datetime, timedelta\r\nfrom django.utils import timezone\r\nfrom accounts.models import Timetable\r\nfrom .models import Notification\r\nfrom .infobip_service import InfobipService\r\n\r\n@shared_task\r\ndef check_upcoming_lectures():\r\n    now = timezone.now()\r\n    threshold = now + timedelta(minutes=30)\r\n    \r\n    upcoming_lectures = Timetable.objects.filter(\r\n        date=now.date(),\r\n        start_time__gte=now.time(),\r\n        start_time__lte=(now + timedelta(minutes=30)).time()\r\n    ).select_related('lecturer')\r\n\r\n    infobip = InfobipService()\r\n\r\n    for lecture in upcoming_lectures:\r\n        # Check if notification already sent\r\n        if not Notification.objects.filter(\r\n            lecturer=lecture.lecturer,\r\n            sent_at__date=now.date(),\r\n            is_sent=True\r\n        ).exists():\r\n            message = (\r\n                f\"Reminder: You have a {lecture.course} lecture \"\r\n                f\"at {lecture.start_time} in {lecture.venue}\"\r\n            )\r\n            \r\n            success, response = infobip.send_sms(\r\n                lecture.lecturer.phone,\r\n                message\r\n            )\r\n            \r\n            # Record notification\r\n            Notification.objects.create(\r\n                lecturer=lecture.lecturer,\r\n                message=message,\r\n                is_sent=success\r\n            )"
+        }
+    ]
+}

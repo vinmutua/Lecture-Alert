@@ -33,6 +33,7 @@ class Admin(AbstractBaseUser):
 
 class Timetable(models.Model):
     id = models.AutoField(primary_key=True)
+    fullname = models.CharField(max_length=100, blank=True)  
     lecturer = models.ForeignKey('Lecturer', on_delete=models.CASCADE, related_name='lecturer_timetables')
     department = models.CharField(max_length=100)
     course = models.CharField(max_length=100)
@@ -45,7 +46,12 @@ class Timetable(models.Model):
         db_table = 'accounts_timetable'
 
     def __str__(self):
-        return f"{self.course} on {self.date} at {self.start_time}"
+        return f"{self.lecturer_fullname} - {self.course} ({self.date})"
+
+    def save(self, *args, **kwargs):
+        if self.lecturer:
+            self.fullname = self.lecturer.fullname 
+        super().save(*args, **kwargs)
 
 class Lecturer(AbstractBaseUser):
     id = models.AutoField(primary_key=True)

@@ -26,4 +26,8 @@ urlpatterns = [
     path('delete-lecturer/<int:lecturer_id>/', views.delete_lecturer, name='delete_lecturer'),
     # EDIT LECTURER URL
     path('edit-lecturer/<int:lecturer_id>/', views.edit_lecturer, name='edit_lecturer'),
+    # ALL ADMINS URL
+    path('all-admins/', views.all_admins, name='all_admins'),
+    # ALL ADMINS URL
+    path('all-admins/', views.all_admins, name='all_admins'),
 ]

@@ -1,0 +1,34 @@
+{
+    "sourceFile": "lecture_alert/notification/models.py",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 4,
+            "patches": [
+                {
+                    "date": 1737036184490,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                },
+                {
+                    "date": 1737040482696,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -1,2 +1,16 @@\n from django.db import models\r\n+from accounts.models import Lecturer\r\n \r\n+class Notification(models.Model):\r\n+    id = models.AutoField(primary_key=True)\r\n+    fullname = models.CharField(max_length=100)\r\n+    message = models.TextField()\r\n+    sent_at = models.DateTimeField(auto_now_add=True)\r\n+    is_sent = models.BooleanField(default=False)\r\n+\r\n+    class Meta:\r\n+        db_table = 'notifications'\r\n+        ordering = ['-sent_at']\r\n+\r\n+    def __str__(self):\r\n+        return f\"{self.fullname} - {self.sent_at}\"\r\n"
+                },
+                {
+                    "date": 1737121763559,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -2,9 +2,9 @@\n from accounts.models import Lecturer\r\n \r\n class Notification(models.Model):\r\n     id = models.AutoField(primary_key=True)\r\n-    fullname = models.CharField(max_length=100)\r\n+    lecturer = models.ForeignKey(Lecturer, on_delete=models.CASCADE, related_name='notifications')\r\n     message = models.TextField()\r\n     sent_at = models.DateTimeField(auto_now_add=True)\r\n     is_sent = models.BooleanField(default=False)\r\n \r\n@@ -12,5 +12,5 @@\n         db_table = 'notifications'\r\n         ordering = ['-sent_at']\r\n \r\n     def __str__(self):\r\n-        return f\"{self.fullname} - {self.sent_at}\"\r\n+        return f\"{self.lecturer.fullname} - {self.sent_at}\"\r\n"
+                },
+                {
+                    "date": 1737176825418,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -1,16 +1,1 @@\n-from django.db import models\r\n-from accounts.models import Lecturer\r\n-\r\n-class Notification(models.Model):\r\n-    id = models.AutoField(primary_key=True)\r\n-    lecturer = models.ForeignKey(Lecturer, on_delete=models.CASCADE, related_name='notifications')\r\n-    message = models.TextField()\r\n-    sent_at = models.DateTimeField(auto_now_add=True)\r\n-    is_sent = models.BooleanField(default=False)\r\n-\r\n-    class Meta:\r\n-        db_table = 'notifications'\r\n-        ordering = ['-sent_at']\r\n-\r\n-    def __str__(self):\r\n-        return f\"{self.lecturer.fullname} - {self.sent_at}\"\r\n+?\n\\ No newline at end of file\n"
+                },
+                {
+                    "date": 1737176832122,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -1,1 +1,16 @@\n-?\n\\ No newline at end of file\n+# from django.db import models\r\n+# from accounts.models import Lecturer\r\n+\r\n+# class Notification(models.Model):\r\n+#     id = models.AutoField(primary_key=True)\r\n+#     lecturer = models.ForeignKey(Lecturer, on_delete=models.CASCADE, related_name='notifications')\r\n+#     message = models.TextField()\r\n+#     sent_at = models.DateTimeField(auto_now_add=True)\r\n+#     is_sent = models.BooleanField(default=False)\r\n+\r\n+#     class Meta:\r\n+#         db_table = 'notifications'\r\n+#         ordering = ['-sent_at']\r\n+\r\n+#     def __str__(self):\r\n+#         return f\"{self.lecturer.fullname} - {self.sent_at}\"\r\n"
+                }
+            ],
+            "date": 1737036184490,
+            "name": "Commit-0",
+            "content": "from django.db import models\r\n\r\n"
+        }
+    ]
+}
