@@ -1,0 +1,30 @@
+{
+  "name": "lecture_alert",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "build": "tailwindcss -i ./static/css/src/main.css -o ./static/css/dist/main.css",
+    "watch": "tailwindcss -i ./static/css/src/main.css -o ./static/css/dist/main.css --watch",
+    "flowbite": "powershell -Command \"Copy-Item -Path './node_modules/flowbite/dist/*' -Destination './static/flowbite' -Recurse -Force\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vinmutua/Lecture-Alert.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/vinmutua/Lecture-Alert/issues"
+  },
+  "homepage": "https://github.com/vinmutua/Lecture-Alert#readme",
+  "description": "",
+  "devDependencies": {
+    "autoprefixer": "^10.4.14",
+    "postcss": "^8.4.27",
+    "tailwindcss": "^3.3.3"
+  },
+  "dependencies": {
+    "flowbite": "^3.1.2"
+  }
+}
