@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Login | Lecture Alert{% endblock %}
+{% block title %}Login{% endblock %}
 
 {% block extra_css %}
 <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
@@ -13,6 +13,14 @@
         transform: translateY(-50%) scale(0.85);
         background-color: white;
         padding: 0 0.25rem;
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .animate-fadeIn {
+        animation: fadeIn 0.3s ease-out;
     }
 </style>
 {% endblock %}
@@ -35,14 +43,22 @@
             {% csrf_token %}
 
             {% if messages %}
-            <div class="rounded-lg bg-red-50 p-4 border-l-4 border-red-400">
+            <div class="rounded-lg bg-red-50 p-4 border-l-4 border-red-400 animate-fadeIn">
                 <div class="flex">
                     <div class="flex-shrink-0">
                         <i class='bx bx-error-circle text-red-400 text-xl'></i>
                     </div>
                     <div class="ml-3">
                         {% for message in messages %}
-                        <p class="text-sm font-medium text-red-800">{{ message }}</p>
+                        <p class="text-sm font-medium text-red-800">
+                            {{ message }}
+                            {% if forloop.last %}
+                            <button onclick="this.parentElement.parentElement.parentElement.parentElement.remove()" 
+                                    class="ml-2 text-red-600 hover:text-red-800">
+                                <i class='bx bx-x'></i>
+                            </button>
+                            {% endif %}
+                        </p>
                         {% endfor %}
                     </div>
                 </div>
@@ -162,5 +178,9 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'accounts/js/login.js' %}"></script>
 {% endblock %}
 

@@ -1,0 +1,35 @@
+# Django core
+Django==5.1.7
+django-environ==0.11.2
+django-crispy-forms==2.1
+
+
+
+# Authentication
+django-allauth==0.61.0
+
+# CSS Framework 
+django-tailwind==3.8.0
+
+# Development tools
+django-debug-toolbar==4.3.0
+django-extensions==3.2.3
+
+# API
+djangorestframework==3.15.0
+markdown==3.5.2       # For API docs
+django-filter==24.1    # For filtering API results
+
+# Production
+gunicorn==22.0.0      # WSGI HTTP Server
+whitenoise==6.6.0     # Static file serving
+dj-database-url==2.1.0 # Database URL configuration
+
+# Task scheduling (for lecture reminders)
+celery==5.3.6
+redis==5.0.1          # As a message broker
+
+# Testing
+pytest==7.4.4
+pytest-django==4.7.0
+coverage==7.4.1

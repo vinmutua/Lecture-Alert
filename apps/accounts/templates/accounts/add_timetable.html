@@ -25,92 +25,102 @@
         <div class="bg-white shadow rounded-lg p-6">
             <form method="POST" action="{% url 'add_timetable' lecturer.id %}" class="space-y-6">
                 {% csrf_token %}
+                <!-- For department selection -->
+                <input type="hidden" name="form_type" value="{% if not form_data %}department_select{% else %}timetable_submit{% endif %}">
                 
+                <!-- Department and Course selects -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <!-- Department Select -->
                     <div>
-                        <label for="departmentSelect1" class="block text-sm font-medium text-gray-700 mb-1">
+                        <label for="department" class="block text-sm font-medium text-gray-700 mb-1">
                             Department
                         </label>
                         <select name="department" 
-                                id="departmentSelect1" 
-                                required
+                                id="department" 
+                                onchange="this.form.submit()"
                                 class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 rounded-md shadow-sm">
-                            <option value="" disabled selected>Select Department</option>
-                            {% for dept_name in departments.keys %}
-                                <option value="{{ dept_name }}">{{ dept_name }}</option>
+                            <option value="" disabled {% if not selected_department %}selected{% endif %}>Select a Department</option>
+                            {% for department in departments %}
+                            <option value="{{ department.id }}" 
+                                    {% if selected_department == department.id %}selected{% endif %}>
+                                {{ department.name }}
+                            </option>
                             {% endfor %}
                         </select>
                     </div>
 
                     <!-- Courses Select -->
                     <div>
-                        <label for="coursesSelect1" class="block text-sm font-medium text-gray-700 mb-1">
+                        <label for="course" class="block text-sm font-medium text-gray-700 mb-1">
                             Course
                         </label>
                         <select name="course" 
-                                id="coursesSelect1" 
+                                id="course" 
                                 required
-                                class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 rounded-md shadow-sm">
-                            <option value="" disabled selected>Select Course</option>
+                                class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 rounded-md shadow-sm"
+                                {% if not available_courses %}disabled{% endif %}>
+                            <option value="" disabled selected>{% if available_courses %}Select a Course{% else %}Select a Department First{% endif %}</option>
+                            {% for course in available_courses %}
+                            <option value="{{ course.id }}" 
+                                    {% if selected_course == course.id %}selected{% endif %}>
+                                {{ course.name }}
+                            </option>
+                            {% endfor %}
                         </select>
                     </div>
+                </div>
 
-                    <!-- Date Input -->
+                <!-- Date and Time fields -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div>
-                        <label for="date" class="block text-sm font-medium text-gray-700 mb-1">
-                            Date
-                        </label>
+                        <label for="date" class="block text-sm font-medium text-gray-700 mb-1">Date</label>
                         <input type="date" 
                                name="date" 
-                               id="date" 
+                               id="date"
+                               value="{{ form_data.date }}"
                                required
                                class="mt-1 block w-full border-gray-300 focus:ring-indigo-500 focus:border-indigo-500 rounded-md shadow-sm">
                     </div>
-
-                    <!-- Start Time -->
                     <div>
-                        <label for="start_time" class="block text-sm font-medium text-gray-700 mb-1">
-                            Start Time
-                        </label>
+                        <label for="start_time" class="block text-sm font-medium text-gray-700 mb-1">Start Time</label>
                         <input type="time" 
                                name="start_time" 
-                               id="start_time" 
+                               id="start_time"
+                               value="{{ form_data.start_time }}"
                                required
                                class="mt-1 block w-full border-gray-300 focus:ring-indigo-500 focus:border-indigo-500 rounded-md shadow-sm">
                     </div>
-
-                    <!-- End Time -->
                     <div>
-                        <label for="end_time" class="block text-sm font-medium text-gray-700 mb-1">
-                            End Time
-                        </label>
+                        <label for="end_time" class="block text-sm font-medium text-gray-700 mb-1">End Time</label>
                         <input type="time" 
                                name="end_time" 
-                               id="end_time" 
-                               required
-                               class="mt-1 block w-full border-gray-300 focus:ring-indigo-500 focus:border-indigo-500 rounded-md shadow-sm">
-                    </div>
-
-                    <!-- Venue -->
-                    <div>
-                        <label for="venue" class="block text-sm font-medium text-gray-700 mb-1">
-                            Venue
-                        </label>
-                        <input type="text" 
-                               name="venue" 
-                               id="venue"
-                               placeholder="Enter venue" 
+                               id="end_time"
+                               value="{{ form_data.end_time }}"
                                required
                                class="mt-1 block w-full border-gray-300 focus:ring-indigo-500 focus:border-indigo-500 rounded-md shadow-sm">
                     </div>
                 </div>
 
+                <!-- Venue -->
+                <div>
+                    <label for="venue" class="block text-sm font-medium text-gray-700 mb-1">Venue</label>
+                    <input type="text" 
+                           name="venue" 
+                           id="venue"
+                           value="{{ form_data.venue }}"
+                           required
+                           placeholder="Enter venue"
+                           class="mt-1 block w-full border-gray-300 focus:ring-indigo-500 focus:border-indigo-500 rounded-md shadow-sm">
+                </div>
+
                 <!-- Submit Button -->
-                <div class="flex justify-end pt-4">
+                <div class="flex justify-end space-x-4">
+                    <a href="{% url 'view_timetable' lecturer.id %}" 
+                       class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                        Cancel
+                    </a>
                     <button type="submit" 
-                            class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors">
-                        <i class='bx bx-plus mr-2'></i>
+                            class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                         Add Timetable Entry
                     </button>
                 </div>
@@ -120,8 +130,10 @@
 </div>
 
 {% block scripts %}
+<script id="departments-data" type="application/json">
+{% if departments_json %}{{ departments_json|safe }}{% else %}{}{% endif %}
+</script>
 <script>
-    // Keep the existing JavaScript functionality
     document.addEventListener('DOMContentLoaded', function() {
         console.log('DOM loaded - Debug check');
         
@@ -133,28 +145,24 @@
             courses: !!coursesSelect
         });
 
-        const coursesOptions = {
-            'Agriculture and Environmental Sciences': ['Agricultural Engineering', 'Animal Science', 'Crop Science', 'Food Science and Technology'],
-            'Business, Economics and Tourism': ['Business Administration', 'Accounting', 'Public Administration', 'Marketing'],
-            'Education & Lifelong Learning': ['Educational Psychology', 'Guidance and Counselling', 'Adult Education'],
-            'Engineering and Architecture': ['Architecture and interior design', 'Building Technology', 'Quantity Surveying'],
-            'Health Sciences': ['Human Anatomy', 'Human Physiology', 'Medical Biochemistry'],
-            'Law': ['Civil Law', 'Common Law', 'International Law'],
-            'Pure And Applied Sciences': ['Microbiology', 'Chemistry', 'Mathematics & Actuarial Science', 'Physics']
-        };
+        // Get departments data from the JSON
+        const departmentsDataElement = document.getElementById('departments-data');
+        const departmentsData = JSON.parse(departmentsDataElement.textContent);
+        console.log('Loaded departments data:', departmentsData);
 
         function updateCourses(department) {
             console.log('Updating courses for:', department);
             
             coursesSelect.innerHTML = '<option value="" disabled selected>Select Course</option>';
             
-            const courses = coursesOptions[department] || [];
+            const courses = departmentsData[department] || [];
             console.log('Available courses:', courses);
             
             courses.forEach(course => {
                 const option = document.createElement('option');
-                option.value = course;
-                option.textContent = course;
+                option.value = course.name;  // Use course name as value
+                option.textContent = course.name;
+                option.setAttribute('data-id', course.id);  // Store ID as data attribute
                 coursesSelect.appendChild(option);
             });
         }
@@ -162,6 +170,40 @@
         departmentSelect.addEventListener('change', function() {
             console.log('Department changed to:', this.value);
             updateCourses(this.value);
+        });
+    });
+</script>
+
+<!-- JavaScript for Dynamic Dropdown -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const departmentSelect = document.getElementById('department');
+        const courseSelect = document.getElementById('course');
+
+        departmentSelect.addEventListener('change', function() {
+            const departmentId = this.value;
+
+            // Clear the courses dropdown
+            courseSelect.innerHTML = '<option value="" disabled selected>Select a Course</option>';
+
+            if (departmentId) {
+                // Fetch courses for the selected department
+                fetch(`/get-courses-by-department/?department_id=${departmentId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.courses) {
+                            data.courses.forEach(course => {
+                                const option = document.createElement('option');
+                                option.value = course.id;
+                                option.textContent = course.name;
+                                courseSelect.appendChild(option);
+                            });
+                        } else {
+                            console.error('Error fetching courses:', data.error);
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+            }
         });
     });
 </script>

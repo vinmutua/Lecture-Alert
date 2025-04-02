@@ -25,7 +25,6 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 
-AUTH_USER_MODEL = 'accounts.Admin'
 
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
@@ -41,9 +40,11 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'livereload',
+   
     # Use proper app paths to match your directory structure:
-    'apps.accounts',  # Change from 'accounts'
+    'apps.accounts',  # Change from 'accounts' 
     'apps.notification',  # Change from 'notification' 
+
     'django_celery_beat',
 ]
 
@@ -140,3 +141,29 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+from django.contrib.messages import constants as message_constants
+
+# Message settings
+MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
+MESSAGE_TAGS = {
+    message_constants.DEBUG: 'debug',
+    message_constants.INFO: 'info',
+    message_constants.SUCCESS: 'success',
+    message_constants.WARNING: 'warning',
+    message_constants.ERROR: 'error',
+}
+
+# Custom message settings
+MESSAGE_LEVEL = message_constants.DEBUG  # Show all messages
+MESSAGE_EXPIRE_SECONDS = 3  # Messages expire after 3 seconds
+
+# Session settings
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+SESSION_COOKIE_AGE = 86400  # 24 hours
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+
+# Authentication settings
+LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = 'lecturer_dashboard'
+LOGOUT_REDIRECT_URL = 'login'

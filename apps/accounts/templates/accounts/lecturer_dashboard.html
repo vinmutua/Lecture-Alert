@@ -1,57 +1,121 @@
+{% extends 'base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lecturer Dashboard</title>
-    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
-    <link rel="stylesheet" href="{% static 'css/timetable.css' %}">
-</head>
-<body>
-  
-    <nav>
-        <a href="#"><i class='bx bx-arrow-back'></i></a>
-        
 
-    </nav>
+{% block title %}Lecturer Dashboard{% endblock %}
 
-    <header style="text-align: center;font-size: 40px; margin-top: 30px; margin-bottom: 30px;">
-        Welcome {{ lecturer.fullname }}
-    </header>
-    
-    <table class="table table-striped table-hover" ">
-        <thead>
-            <tr>
-                <th>X</th>
-                <th>Department</th>
-                <th>Course</th>
-                <th>Date</th>
-                <th>Start_time</th>
-                <th>End_time</th>
-                <th>Venue</th>
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-6">
+    <!-- Welcome Header -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="mb-8">
+            <nav class="flex items-center justify-between">
+                <a href="{% url 'logout' %}" 
+                   class="flex items-center text-gray-600 hover:text-gray-900 transition-colors">
+                    <i class='bx bx-log-out text-xl mr-2'></i>
+                    <span>Logout</span>
+                </a>
+                <div class="flex items-center space-x-4">
+                    <span class="text-gray-600">
+                        <i class='bx bx-time text-xl'></i>
+                        <span id="currentTime"></span>
+                    </span>
+                    <span class="text-gray-600">
+                        <i class='bx bx-calendar text-xl'></i>
+                        <span id="currentDate"></span>
+                    </span>
+                </div>
+            </nav>
 
+            <div class="mt-6 text-center">
+                <h1 class="text-3xl font-bold text-gray-900">
+                    Welcome, {{ lecturer.fullname }}
+                </h1>
+                <p class="mt-2 text-gray-600">
+                    Your Upcoming Lectures
+                </p>
+            </div>
+        </div>
 
-                
-            </tr>
-        </thead>
-        <tbody>
-            {% for timetable in timetables %}
-            <tr>
-                <td>{{ forloop.counter }}</td>
-                <td>{{ timetable.department }}</td>
-                <td>{{ timetable.course }}</td>
-                <td>{{ timetable.date|date:"d/m/Y" }}</td>
-                <td>{{ timetable.start_time|time:"H:i" }}</td>
-                <td>{{ timetable.end_time|time:"H:i" }}</td>
-                <td>{{ timetable.venue }}</td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="7">No timetables found</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</body>
-</html>
+        <!-- Timetable Section -->
+        <div class="bg-white rounded-lg shadow overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No.</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Department</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Course</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Venue</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for timetable in timetables %}
+                        <tr class="hover:bg-gray-50 transition-colors">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {{ forloop.counter }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {{ timetable.department }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                                    {{ timetable.course }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {{ timetable.date|date:"D, d M Y" }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {{ timetable.start_time|time:"H:i" }} - {{ timetable.end_time|time:"H:i" }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                <span class="flex items-center">
+                                    <i class='bx bx-map text-gray-400 mr-1'></i>
+                                    {{ timetable.venue }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                {% with time_status=timetable.get_time_status %}
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
+                                    {% if time_status == 'upcoming' %}bg-yellow-100 text-yellow-800
+                                    {% elif time_status == 'ongoing' %}bg-green-100 text-green-800
+                                    {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                    {{ time_status|title }}
+                                </span>
+                                {% endwith %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" class="px-6 py-12 text-center text-gray-500 bg-gray-50">
+                                <div class="flex flex-col items-center">
+                                    <i class='bx bx-calendar-x text-4xl mb-2'></i>
+                                    <p class="text-lg font-medium">No lectures scheduled</p>
+                                    <p class="text-sm mt-1">Your timetable is currently empty</p>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function updateDateTime() {
+        const now = new Date();
+        document.getElementById('currentTime').textContent = now.toLocaleTimeString();
+        document.getElementById('currentDate').textContent = now.toLocaleDateString();
+    }
+
+    updateDateTime();
+    setInterval(updateDateTime, 1000);
+</script>
+{% endblock %}

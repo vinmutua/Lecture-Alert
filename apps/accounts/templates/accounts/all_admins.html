@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Admin Management | Lecture Alert{% endblock %}
+{% block title %}All Administrators | Lecture Alert{% endblock %}
 
 {% block extra_css %}
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
@@ -45,10 +45,11 @@
                     <h2 class="text-2xl font-bold text-gray-800">All Administrators</h2>
                     <p class="text-gray-600">Manage system administrators and their permissions</p>
                 </div>
-                <button id="addAdminBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-md transition-colors flex items-center">
+                <a href="{% url 'add_admin' %}" 
+                   class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-md transition-colors flex items-center">
                     <i class='bx bx-plus mr-2'></i>
                     Add New Admin
-                </button>
+                </a>
             </div>
             
             <!-- Admins table -->
@@ -68,38 +69,53 @@
                         <tbody class="bg-white divide-y divide-gray-200">
                             {% for admin in admins %}
                             <tr id="admin-row-{{ admin.id }}" class="hover:bg-gray-50 transition-colors">
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ forloop.counter }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm font-medium text-gray-900">{{ admin.fullname }}</div>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    {{ forloop.counter }}
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ admin.username }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ admin.email }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ admin.phone|default:"Not provided" }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <div class="text-sm font-medium text-gray-900">
+                                            {{ admin.fullname }}
+                                            {% if admin.admin__is_super_admin %}
+                                                <span class="ml-2 px-2 py-1 text-xs bg-indigo-100 text-indigo-800 rounded-full">
+                                                    Super Admin
+                                                </span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    {{ admin.username }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    {{ admin.email }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    {{ admin.phone|default:"Not provided" }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                     <div class="flex space-x-3">
-                                        <button 
-                                            class="text-blue-600 hover:text-blue-800 transition-colors edit-admin-btn" 
-                                            data-id="{{ admin.id }}"
-                                            data-name="{{ admin.fullname }}"
-                                            data-username="{{ admin.username }}"
-                                            data-email="{{ admin.email }}"
-                                            data-phone="{{ admin.phone|default:'' }}">
-                                            <i class='bx bx-edit'></i>
-                                        </button>
-                                        <button 
-                                            class="text-red-600 hover:text-red-800 transition-colors delete-admin-btn" 
-                                            data-id="{{ admin.id }}"
-                                            data-name="{{ admin.fullname }}">
-                                            <i class='bx bx-trash'></i>
-                                        </button>
+                                        <form method="GET" action="{% url 'update_admin' admin.id %}" class="inline-block">
+                                            <button type="submit" class="text-blue-600 hover:text-blue-800 transition-colors">
+                                                <i class='bx bx-edit'></i>
+                                            </button>
+                                        </form>
+                                        <form method="POST" action="{% url 'delete_admin' admin.id %}" class="inline-block" onsubmit="return confirm('Are you sure you want to delete this administrator?');">
+                                            {% csrf_token %}
+                                            <button type="submit" class="text-red-600 hover:text-red-800 transition-colors">
+                                                <i class='bx bx-trash'></i>
+                                            </button>
+                                        </form>
                                     </div>
                                 </td>
                             </tr>
                             {% empty %}
                             <tr>
                                 <td colspan="6" class="px-6 py-8 text-center text-sm text-gray-500 bg-gray-50 italic">
-                                    No administrators found in the system. 
-                                    <button id="emptyAddAdminBtn" class="text-indigo-600 hover:text-indigo-800 font-medium">Add your first admin</button>
+                                    No administrators found. 
+                                    <button id="emptyAddAdminBtn" class="text-indigo-600 hover:text-indigo-800 font-medium">
+                                        Add your first admin
+                                    </button>
                                 </td>
                             </tr>
                             {% endfor %}
@@ -110,226 +126,8 @@
         </div>
     </div>
 
-    <!-- Add/Edit Admin Modal -->
-    <div id="adminModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 items-center justify-center z-50 hidden">
-        <div class="bg-white rounded-lg shadow-lg max-w-md w-full mx-4 transform transition-all">
-            <div class="px-6 py-4 border-b border-gray-200">
-                <div class="flex items-center justify-between">
-                    <h3 class="text-lg font-medium text-gray-900" id="modalTitle">Add New Admin</h3>
-                    <button class="text-gray-400 hover:text-gray-500 close-modal">
-                        <i class='bx bx-x text-xl'></i>
-                    </button>
-                </div>
-            </div>
 
-            <form id="adminForm" method="POST" action="{% url 'register' %}">
-                {% csrf_token %}
-                <input type="hidden" name="admin_id" id="admin_id" value="">
-                <input type="hidden" name="role" value="Admin">
 
-                <div class="px-6 py-4 space-y-4">
-                    <div>
-                        <label for="fullname" class="block text-sm font-medium text-gray-700">Full Name</label>
-                        <input type="text" name="fullname" id="fullname" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" required>
-                    </div>
-                    
-                    <div>
-                        <label for="username" class="block text-sm font-medium text-gray-700">Username</label>
-                        <input type="text" name="username" id="username" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" required>
-                    </div>
-                    
-                    <div>
-                        <label for="email" class="block text-sm font-medium text-gray-700">Email Address</label>
-                        <input type="email" name="email" id="email" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" required>
-                    </div>
-                    
-                    <div>
-                        <label for="phone" class="block text-sm font-medium text-gray-700">Phone Number <span class="text-xs text-gray-500">(Optional)</span></label>
-                        <input type="tel" name="phone" id="phone" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                    </div>
-                    
-                    <div id="password-container">
-                        <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
-                        <input type="password" name="password" id="password" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" minlength="8">
-                        <p class="mt-1 text-xs text-gray-500">Minimum 8 characters</p>
-                    </div>
-                </div>
-
-                <div class="px-6 py-4 bg-gray-50 text-right space-x-2 rounded-b-lg">
-                    <button type="button" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 close-modal">
-                        Cancel
-                    </button>
-                    <button type="submit" class="inline-flex justify-center px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                        <span id="submitBtnText">Add Admin</span>
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Delete Confirmation Modal -->
-    <div id="deleteModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 items-center justify-center z-50 hidden">
-        <div class="bg-white rounded-lg shadow-lg max-w-md w-full mx-4">
-            <div class="px-6 py-4 border-b border-gray-200">
-                <div class="flex items-center justify-between">
-                    <h3 class="text-lg font-medium text-gray-900">Confirm Deletion</h3>
-                    <button class="text-gray-400 hover:text-gray-500 close-delete-modal">
-                        <i class='bx bx-x text-xl'></i>
-                    </button>
-                </div>
-            </div>
-
-            <div class="px-6 py-4">
-                <p class="text-sm text-gray-600">Are you sure you want to delete this administrator? This action cannot be undone.</p>
-                <div class="mt-4 p-4 bg-red-50 border-l-4 border-red-400 text-red-700">
-                    <p class="font-medium">Warning:</p>
-                    <p id="deleteAdminName" class="text-sm"></p>
-                </div>
-            </div>
-
-            <div class="px-6 py-4 bg-gray-50 text-right space-x-2 rounded-b-lg">
-                <button type="button" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 close-delete-modal">
-                    Cancel
-                </button>
-                <form id="deleteForm" method="POST" action="#" class="inline-block">
-                    {% csrf_token %}
-                    <button type="submit" class="inline-flex justify-center px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
-                        Delete
-                    </button>
-                </form>
-            </div>
-        </div>
-    </div>
+  
 {% endblock %}
 
-{% block scripts %}
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Modal handling
-        const adminModal = document.getElementById('adminModal');
-        const deleteModal = document.getElementById('deleteModal');
-        const addAdminBtn = document.getElementById('addAdminBtn');
-        const emptyAddAdminBtn = document.getElementById('emptyAddAdminBtn');
-        const closeModalBtns = document.querySelectorAll('.close-modal');
-        const closeDeleteModalBtns = document.querySelectorAll('.close-delete-modal');
-        const editAdminBtns = document.querySelectorAll('.edit-admin-btn');
-        const deleteAdminBtns = document.querySelectorAll('.delete-admin-btn');
-        const adminForm = document.getElementById('adminForm');
-        const deleteForm = document.getElementById('deleteForm');
-        
-        // Open add admin modal
-        if (addAdminBtn) {
-            addAdminBtn.addEventListener('click', function() {
-                openAddModal();
-            });
-        }
-        
-        // Open add admin modal from empty state
-        if (emptyAddAdminBtn) {
-            emptyAddAdminBtn.addEventListener('click', function() {
-                openAddModal();
-            });
-        }
-        
-        // Close admin modal
-        closeModalBtns.forEach(btn => {
-            btn.addEventListener('click', function() {
-                adminModal.classList.add('hidden');
-            });
-        });
-        
-        // Close delete modal
-        closeDeleteModalBtns.forEach(btn => {
-            btn.addEventListener('click', function() {
-                deleteModal.classList.add('hidden');
-            });
-        });
-        
-        // Open edit admin modal
-        editAdminBtns.forEach(btn => {
-            btn.addEventListener('click', function() {
-                const id = this.dataset.id;
-                const name = this.dataset.name;
-                const username = this.dataset.username;
-                const email = this.dataset.email;
-                const phone = this.dataset.phone;
-                
-                openEditModal(id, name, username, email, phone);
-            });
-        });
-        
-        // Open delete confirmation
-        deleteAdminBtns.forEach(btn => {
-            btn.addEventListener('click', function() {
-                const id = this.dataset.id;
-                const name = this.dataset.name;
-                
-                openDeleteModal(id, name);
-            });
-        });
-        
-        // Helper functions
-        function openAddModal() {
-            // Reset form and set for adding
-            adminForm.reset();
-            document.getElementById('admin_id').value = '';
-            document.getElementById('modalTitle').textContent = 'Add New Admin';
-            document.getElementById('submitBtnText').textContent = 'Add Admin';
-            
-            // Show password field for new admins
-            document.getElementById('password-container').classList.remove('hidden');
-            document.getElementById('password').required = true;
-            
-            // Update form action for adding
-            adminForm.action = "{% url 'register' %}";
-            
-            // Show the modal
-            adminModal.classList.remove('hidden');
-        }
-        
-        function openEditModal(id, name, username, email, phone) {
-            // Fill form with admin data
-            document.getElementById('admin_id').value = id;
-            document.getElementById('fullname').value = name;
-            document.getElementById('username').value = username;
-            document.getElementById('email').value = email;
-            document.getElementById('phone').value = phone || '';
-            
-            // Hide password field for editing (optional update)
-            document.getElementById('password-container').classList.add('hidden');
-            document.getElementById('password').required = false;
-            
-            // Update modal title and button
-            document.getElementById('modalTitle').textContent = 'Edit Admin';
-            document.getElementById('submitBtnText').textContent = 'Save Changes';
-            
-            // Update form action for editing
-            adminForm.action = "{% url 'update_admin' 0 %}".replace('0', id);
-            
-            // Show the modal
-            adminModal.classList.remove('hidden');
-        }
-        
-        function openDeleteModal(id, name) {
-            // Update delete form action
-            deleteForm.action = "{% url 'delete_admin' 0 %}".replace('0', id);
-            
-            // Display name in warning
-            document.getElementById('deleteAdminName').textContent = 'You are about to delete ' + name;
-            
-            // Show the modal
-            deleteModal.classList.remove('hidden');
-        }
-        
-        // Close modals if clicking outside
-        window.addEventListener('click', function(event) {
-            if (event.target === adminModal) {
-                adminModal.classList.add('hidden');
-            }
-            if (event.target === deleteModal) {
-                deleteModal.classList.add('hidden');
-            }
-        });
-    });
-</script>
-{% endblock %}
