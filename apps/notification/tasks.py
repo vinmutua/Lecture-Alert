@@ -1,51 +1,41 @@
 from celery import shared_task
-from django.utils import timezone
-from datetime import timedelta
-from accounts.models import Timetable
+from django.utils.timezone import now, timedelta
+from apps.accounts.models import Timetable
+from .email_service import EmailService
 from .models import Notification
-from .infobip_service import InfobipService
 
 @shared_task
-def check_and_send_notifications():
-    # Get current time and 30min threshold
-    now = timezone.now()
-    thirty_mins_later = now + timedelta(minutes=30)
-
-    # Find upcoming lectures
-    upcoming_lectures = Timetable.objects.filter(
-        date=now.date(),
-        start_time__gte=now.time(),
-        start_time__lte=thirty_mins_later.time()
+def send_upcoming_class_notifications():
+    """Send email notifications to lecturers about their upcoming classes."""
+    email_service = EmailService()
+    current_time = now()
+    upcoming_classes = Timetable.objects.filter(
+        date=current_time.date(),
+        start_time__gte=current_time.time(),
+        start_time__lte=(current_time + timedelta(hours=1)).time()
     ).select_related('lecturer')
 
-    # Initialize InfoBip service
-    sms_service = InfobipService()
-
-    for lecture in upcoming_lectures:
-        # Check if notification already sent
-        notification_exists = Notification.objects.filter(
-            lecturer=lecture.lecturer,
-            sent_at__date=now.date(),
-            is_sent=True
-        ).exists()
-
-        if not notification_exists:
-            # Prepare message
+    for timetable in upcoming_classes:
+        lecturer = timetable.lecturer
+        if lecturer.email:
+            subject = "Upcoming Class Notification"
             message = (
-                f"Reminder: You have a {lecture.course} lecture "
-                f"scheduled for {lecture.start_time} "
-                f"at {lecture.venue}"
+                f"Dear {lecturer.fullname},\n\n"
+                f"You have an upcoming class:\n"
+                f"Course: {timetable.course.name}\n"
+                f"Department: {timetable.department.name}\n"
+                f"Date: {timetable.date}\n"
+                f"Time: {timetable.start_time} - {timetable.end_time}\n"
+                f"Venue: {timetable.venue}\n\n"
+                f"Best regards,\nLecture Alert System"
             )
-
-            # Send SMS
-            success, response = sms_service.send_sms(
-                lecture.lecturer.phone,
-                message
-            )
-
-            # Record notification
+            success, response = email_service.send_email(lecturer.email, subject, message)
             Notification.objects.create(
-                lecturer=lecture.lecturer,
+                lecturer=lecturer,
                 message=message,
                 is_sent=success
             )
+            if success:
+                print(f"Email sent to {lecturer.fullname} ({lecturer.email})")
+            else:
+                print(f"Failed to send email to {lecturer.fullname}: {response}")

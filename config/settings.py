@@ -33,25 +33,27 @@ AUTHENTICATION_BACKENDS = [
 
 
 INSTALLED_APPS = [
+    # Django default apps
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'livereload',
-   
-    # Use proper app paths to match your directory structure:
-    'apps.accounts',  # Change from 'accounts' 
-    'apps.notification',  # Change from 'notification' 
 
+    # Third-party apps
+    'livereload',
     'django_celery_beat',
+
+    # Your apps
+    'apps.accounts',  # Ensure this is included
+    'apps.notification',  # Ensure this is included
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'livereload.middleware.LiveReloadScript',  # Add this line
+    'livereload.middleware.LiveReloadScript', 
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -167,3 +169,21 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'lecturer_dashboard'
 LOGOUT_REDIRECT_URL = 'login'
+
+
+
+# Celery settings
+CELERY_BROKER_URL = 'redis://localhost:6379/0'  # Replace with your Redis URL
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'  # Replace with your Redis URL
+
+# Email settings for Brevo SMTP relay
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp-relay.brevo.com'
+EMAIL_PORT = 587  # Use 465 if you prefer SSL
+EMAIL_USE_TLS = True  # Use EMAIL_USE_SSL = True if using port 465
+EMAIL_HOST_USER = os.getenv('DEFAULT_FROM_EMAIL', '89a944001@smtp-brevo.com')  # Replace with your Brevo login email
+EMAIL_HOST_PASSWORD = os.getenv('BREVO_SMTP_KEY', '0Tr6pmFGPD4NEfH9')  # Replace with your Brevo SMTP key
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'vincentmutua02@gmail.com')  # Must match a verified sender in Brevo
+
