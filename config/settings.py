@@ -43,17 +43,17 @@ INSTALLED_APPS = [
 
     # Third-party apps
     'livereload',
-    'django_celery_beat',
+    'django_celery_beat',  # Ensure this appears only once
 
     # Your apps
-    'apps.accounts',  # Ensure this is included
-    'apps.notification',  # Ensure this is included
+    'apps.accounts',
+    'apps.notification',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'livereload.middleware.LiveReloadScript', 
+    'livereload.middleware.LiveReloadScript',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -178,12 +178,18 @@ CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'  # Replace with your Redis URL
 
-# Email settings for Brevo SMTP relay
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp-relay.brevo.com'
-EMAIL_PORT = 587  # Use 465 if you prefer SSL
-EMAIL_USE_TLS = True  # Use EMAIL_USE_SSL = True if using port 465
-EMAIL_HOST_USER = os.getenv('DEFAULT_FROM_EMAIL', '89a944001@smtp-brevo.com')  # Replace with your Brevo login email
-EMAIL_HOST_PASSWORD = os.getenv('BREVO_SMTP_KEY', '0Tr6pmFGPD4NEfH9')  # Replace with your Brevo SMTP key
-DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'vincentmutua02@gmail.com')  # Must match a verified sender in Brevo
+# Celery Beat settings
+from celery.schedules import crontab
+
+CELERY_BEAT_SCHEDULE = {
+    'send-notifications-every-minute': {
+        'task': 'apps.notification.tasks.send_upcoming_class_notifications',
+        'schedule': 60.0,  # Run every 1 minute
+    },
+}
+
+
+DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "vinniebrevo@gmail.com")
+BREVO_API_KEY = os.getenv("BREVO_API_KEY", "")  # Set this in your environment variables
+BREVO_BASE_URL = "https://api.brevo.com/v3/smtp/email"  # Brevo REST API endpoint
 

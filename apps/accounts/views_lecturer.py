@@ -1,6 +1,8 @@
 from django.shortcuts import render, redirect
 from django.utils import timezone
 from datetime import date
+from django.db.models import Exists, OuterRef
+from apps.notification.models import Notification
 from .models import Timetable, Lecturer
 
 def lecturer_dashboard(request):
@@ -24,6 +26,13 @@ def lecturer_dashboard(request):
     timetables = Timetable.objects.filter(
         lecturer=lecturer,
         date__gte=today
+    ).annotate(
+        notification_sent=Exists(
+            Notification.objects.filter(
+                timetable=OuterRef('pk'),
+                is_sent=True
+            )
+        )
     ).select_related('department', 'course').order_by('date', 'start_time')
 
     context = {

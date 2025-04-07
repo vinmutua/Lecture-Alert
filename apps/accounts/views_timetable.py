@@ -1,9 +1,12 @@
 from django.shortcuts import render, redirect, get_object_or_404
-
 from django.contrib import messages
 from django.db import transaction
+import logging
 
 from .models import Lecturer, Timetable, Department, Course
+from apps.notification.tasks import send_upcoming_class_notifications
+
+logger = logging.getLogger(__name__)
 
 
 def view_timetable(request, lecturer_id):
@@ -11,7 +14,7 @@ def view_timetable(request, lecturer_id):
     timetables = Timetable.objects.filter(lecturer=lecturer).select_related(
         'department', 'course'
     ).order_by('date', 'start_time')
-    
+
     return render(request, 'accounts/timetable.html', {
         'lecturer': lecturer,
         'timetables': timetables
@@ -25,12 +28,12 @@ def add_timetable(request, lecturer_id):
     selected_department = None
     available_courses = []
     form_data = {}
-    
+
     if request.method == 'POST':
         form_type = request.POST.get('form_type')
         print(f"Form type: {form_type}")  # Debug line
         print(f"POST data: {request.POST}")  # Debug line
-        
+
         if form_type == 'department_select':
             # Handle department selection
             department_id = request.POST.get('department')
@@ -50,6 +53,18 @@ def add_timetable(request, lecturer_id):
                     end_time=request.POST.get('end_time'),
                     venue=request.POST.get('venue')
                 )
+
+                # Check if this class needs an immediate notification
+                logger.info(f"New timetable entry created: ID={timetable.id}, Start time={timetable.start_time}")
+
+                # Run the notification task immediately
+                try:
+                    logger.info(f"Triggering immediate notification check for timetable ID={timetable.id}")
+                    send_upcoming_class_notifications()
+                    logger.info(f"Immediate notification check completed for timetable ID={timetable.id}")
+                except Exception as notification_error:
+                    logger.error(f"Error triggering notification for new timetable: {str(notification_error)}")
+
                 messages.success(request, 'Timetable entry added successfully')
                 return redirect('view_timetable', lecturer_id=lecturer.id)
             except Exception as e:
@@ -59,7 +74,7 @@ def add_timetable(request, lecturer_id):
                 if form_data.get('department'):
                     selected_department = int(form_data['department'])
                     available_courses = Course.objects.filter(department_id=selected_department)
-    
+
     context = {
         'lecturer': lecturer,
         'departments': departments,
@@ -67,7 +82,7 @@ def add_timetable(request, lecturer_id):
         'available_courses': available_courses,
         'form_data': form_data
     }
-    
+
     return render(request, 'accounts/add_timetable.html', context)
 
 
@@ -84,7 +99,7 @@ def edit_timetable(request, timetable_id):
         form_type = request.POST.get('form_type')
         print(f"Form type: {form_type}")  # Debug print
         print(f"POST data: {request.POST}")  # Debug print
-        
+
         if form_type == 'department_select':
             # Handle department selection
             department_id = request.POST.get('department')
@@ -97,10 +112,10 @@ def edit_timetable(request, timetable_id):
                 # Update timetable
                 department_id = request.POST.get('department')
                 course_id = request.POST.get('course')
-                
+
                 if not department_id or not course_id:
                     raise ValueError("Department and course are required")
-                
+
                 timetable.department_id = department_id
                 timetable.course_id = course_id
                 timetable.date = request.POST.get('date')
@@ -108,8 +123,20 @@ def edit_timetable(request, timetable_id):
                 timetable.end_time = request.POST.get('end_time')
                 timetable.venue = request.POST.get('venue')
                 timetable.save()
-                
+
                 print(f"Timetable updated successfully: {timetable.id}")  # Debug print
+
+                # Check if this updated class needs an immediate notification
+                logger.info(f"Timetable entry updated: ID={timetable.id}, Start time={timetable.start_time}")
+
+                # Run the notification task immediately
+                try:
+                    logger.info(f"Triggering immediate notification check for updated timetable ID={timetable.id}")
+                    send_upcoming_class_notifications()
+                    logger.info(f"Immediate notification check completed for updated timetable ID={timetable.id}")
+                except Exception as notification_error:
+                    logger.error(f"Error triggering notification for updated timetable: {str(notification_error)}")
+
                 messages.success(request, 'Timetable updated successfully')
                 return redirect('view_timetable', lecturer_id=timetable.lecturer.id)
             except Exception as e:
@@ -119,11 +146,11 @@ def edit_timetable(request, timetable_id):
                 if department_id:
                     selected_department = int(department_id)
                     available_courses = Course.objects.filter(department_id=selected_department)
-    
+
     # Load initial courses based on selected department
     if selected_department:
         available_courses = Course.objects.filter(department_id=selected_department)
-    
+
     context = {
         'timetable': timetable,
         'departments': departments,
@@ -132,7 +159,7 @@ def edit_timetable(request, timetable_id):
         'selected_course': timetable.course.id if timetable.course else None,
         'form_data': form_data
     }
-    
+
     return render(request, 'accounts/edit_timetable.html', context)
 
 
@@ -140,11 +167,11 @@ def edit_timetable(request, timetable_id):
 def delete_timetable(request, timetable_id):
     timetable = get_object_or_404(Timetable, id=timetable_id)
     lecturer_id = timetable.lecturer.id
-    
+
     try:
         timetable.delete()
         messages.success(request, 'Timetable entry deleted successfully')
     except Exception as e:
         messages.error(request, f'Error deleting timetable: {str(e)}')
-    
+
     return redirect('view_timetable', lecturer_id=lecturer_id)
